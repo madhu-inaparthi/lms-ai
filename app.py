@@ -22,6 +22,7 @@ def chat():
     try:
         data = request.json
         message = data.get("message", "")
+        history = data.get("history", [])
 
         system_directive = """
 You are an AI Learning Assistant for Godavari Global University's Learning Management System (LMS). Your role is to help B.Tech CSE students with their coursework and academic queries.
@@ -59,8 +60,17 @@ You are an AI Learning Assistant for Godavari Global University's Learning Manag
 - Use bullet points for clarity
 - Provide examples when helpful
 - Reference specific course units when relevant
+
 Always prioritize student learning and academic integrity.
 """
+
+        # Convert frontend history format to Cohere format
+        chat_history = []
+        for msg in history:
+            if msg["role"] == "user":
+                chat_history.append({"role": "USER", "message": msg["content"]})
+            elif msg["role"] == "assistant":
+                chat_history.append({"role": "CHATBOT", "message": msg["content"]})
 
         headers = {
             "Authorization": f"Bearer {API_KEY}",
@@ -71,6 +81,7 @@ Always prioritize student learning and academic integrity.
             "model": "command-r-08-2024",
             "message": message,
             "preamble": system_directive,
+            "chat_history": chat_history,
             "temperature": 0.7
         }
 
